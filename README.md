@@ -27,10 +27,13 @@ harness. This project:
 | ls20 | 7/7 WIN | 497 (776) | **100.00%** | 1.75 h | clean |
 | ft09 | 6/6 WIN | 75 (208) | **100.00%** | 0.9 h | clean; 1 logged infra rerun |
 | ar25 | 8/8 WIN | 265 (748) | **100.00%** | 0.55 h | clean |
-| *remaining 21* | *in progress* | | | | |
+| tr87 | 6/6 WIN | 407 (414) | **83.89%** | 1.03 h | clean |
+| *remaining 20* | *in progress* | | | | |
 
-Reference: Schema's best-of-two per-game results for these games were
-98.63% (sb26, 127 actions) and 100% (ls20, 533 actions, ~6.1 h).
+Reference: Schema's best-of-two per-game results for these games:
+sb26 98.63%, ls20 100%, ft09 100%, ar25 100%, tr87 100%. The single-run
+protocol reports the first attempt as it happened — tr87's 83.89% (a slow
+level 3) is the kind of variance best-of-two hides.
 
 **Contamination caveat, stated up front:** the 25 public games and
 Schema's traces have been public for months and may be inside the
