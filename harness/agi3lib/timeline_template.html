@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>arc3 timeline</title>
+<style>
+  :root {
+    --bg: #14161a; --panel: #1d2026; --line: #2c313a; --ink: #d6dae2;
+    --dim: #8a919e; --accent: #4d9fff; --gold: #ffc857; --red: #ff5d5d;
+    --green: #4ecb71; --ghost: #c77dff;
+    --mono: "SF Mono", ui-monospace, Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 14px/1.45 -apple-system, "Segoe UI", sans-serif; }
+  header { display: flex; gap: 18px; align-items: baseline; flex-wrap: wrap;
+           padding: 10px 16px; border-bottom: 1px solid var(--line); }
+  header h1 { font-size: 15px; margin: 0; font-weight: 600; }
+  header .kv { color: var(--dim); font-size: 12.5px; }
+  header .kv b { color: var(--ink); font-weight: 600; }
+  main { display: grid; grid-template-columns: 560px 1fr; gap: 0;
+         height: calc(100vh - 44px); }
+  #left { padding: 14px 16px; border-right: 1px solid var(--line);
+          overflow-y: auto; }
+  canvas#grid { width: 512px; height: 512px; image-rendering: pixelated;
+                border: 1px solid var(--line); background: #000;
+                display: block; }
+  canvas#grid.ghosting { border-color: var(--ghost); }
+  #ghostbar { display: none; align-items: center; gap: 8px; margin: 8px 0;
+              padding: 6px 10px; border: 1px solid var(--ghost);
+              border-radius: 8px; font-size: 12.5px; }
+  #ghostbar.active { display: flex; }
+  #ghostbar .glabel { color: var(--ghost); font-weight: 600; }
+  #controls { display: flex; gap: 8px; align-items: center; margin: 10px 0 4px; }
+  button { background: var(--panel); color: var(--ink); border: 1px solid
+           var(--line); border-radius: 6px; padding: 4px 10px; cursor:
+           pointer; font-size: 13px; }
+  button:hover { border-color: var(--accent); }
+  button.on { border-color: var(--accent); color: var(--accent); }
+  button.ghostbtn { border-color: var(--ghost); color: var(--ghost); }
+  input[type=range] { flex: 1; accent-color: var(--accent); }
+  #ghostbar input[type=range] { accent-color: var(--ghost); }
+  #stripbar { display: flex; gap: 8px; align-items: center; margin-top: 6px; }
+  #strip { width: 442px; height: 26px; display: block; cursor: pointer; }
+  #turnrail { display: flex; gap: 2px; margin-top: 6px; width: 512px;
+              flex-wrap: wrap; }
+  .turncell { flex: 1 1 auto; min-width: 26px; text-align: center;
+              font-family: var(--mono); font-size: 11px; padding: 2px 0;
+              border: 1px solid var(--line); border-radius: 4px;
+              cursor: pointer; color: var(--dim); background: var(--panel); }
+  .turncell:hover { border-color: var(--accent); }
+  .turncell.cur { border-color: var(--accent); color: var(--accent); }
+  .turncell.zero { border-style: dashed; }
+  .turncell.mis { border-color: var(--red); }
+  .turncell.lvl { color: var(--gold); }
+  #caption { font-family: var(--mono); font-size: 12.5px; color: var(--dim);
+             margin-top: 6px; min-height: 34px; white-space: pre-wrap; }
+  #caption b { color: var(--ink); }
+  #right { overflow-y: auto; padding: 12px 16px; }
+  nav.tabs { display: flex; gap: 6px; margin-bottom: 10px; position: sticky;
+             top: 0; background: var(--bg); padding: 4px 0; z-index: 2; }
+  nav.tabs button.active { border-color: var(--accent); color: var(--accent); }
+  .tab { display: none; } .tab.active { display: block; }
+  .card { background: var(--panel); border: 1px solid var(--line);
+          border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; }
+  .card h3 { margin: 0 0 6px; font-size: 12.5px; color: var(--dim);
+             font-weight: 600; text-transform: uppercase;
+             letter-spacing: .04em; }
+  pre { font-family: var(--mono); font-size: 12px; margin: 6px 0;
+        white-space: pre-wrap; word-break: break-word; max-height: 420px;
+        overflow: auto; background: #16181d; border-radius: 6px;
+        padding: 8px; }
+  .plan-step { display: inline-block; font-family: var(--mono); font-size:
+               12px; padding: 1px 7px; margin: 2px; border-radius: 5px;
+               background: #16181d; border: 1px solid var(--line); }
+  .plan-step.done { color: var(--dim); }
+  .plan-step.now { border-color: var(--gold); color: var(--gold); }
+  .metaevt { display: flex; gap: 8px; align-items: baseline;
+             font-family: var(--mono); font-size: 12px; margin: 3px 0; }
+  .metaevt .idx { color: var(--dim); }
+  .diffline-add { color: var(--green); } .diffline-del { color: var(--red); }
+  .diffline-hunk { color: var(--accent); }
+  details { margin: 6px 0; } summary { cursor: pointer; font-size: 13px; }
+  summary .err { color: var(--red); }
+  select { background: var(--panel); color: var(--ink); border: 1px solid
+           var(--line); border-radius: 6px; padding: 3px 8px;
+           font-size: 12px; }
+  canvas.mini { width: 256px; height: 256px; image-rendering: pixelated;
+                border: 1px solid var(--line); }
+  .mislist button { margin: 2px; font-family: var(--mono); font-size: 12px; }
+  .muted { color: var(--dim); }
+  #helpbtn { margin-left: auto; }
+  #help { display: none; position: fixed; inset: 44px 0 0 0;
+          background: rgba(14,16,20,.96); z-index: 10; overflow-y: auto;
+          padding: 24px max(24px, calc(50vw - 420px)); }
+  #help.open { display: block; }
+  #help h2 { font-size: 15px; margin: 18px 0 6px; color: var(--accent); }
+  #help h2:first-child { margin-top: 0; }
+  #help p, #help li { font-size: 13.5px; color: var(--ink); }
+  #help .k { font-family: var(--mono); background: var(--panel);
+             border: 1px solid var(--line); border-radius: 4px;
+             padding: 0 5px; font-size: 12px; }
+  .legend { display: inline-block; width: 10px; height: 10px;
+            border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>arc3 timeline</h1>
+  <span class="kv">game <b id="h-game"></b></span>
+  <span class="kv">agent <b id="h-agent"></b></span>
+  <span class="kv">state <b id="h-state"></b></span>
+  <span class="kv">levels <b id="h-levels"></b></span>
+  <span class="kv">actions <b id="h-actions"></b></span>
+  <span class="kv">turns <b id="h-turns"></b></span>
+  <span class="kv">mispredicts <b id="h-mis"></b></span>
+  <button id="helpbtn" title="help (press ?)">?&nbsp;help</button>
+</header>
+<div id="help">
+  <h2>What this page is</h2>
+  <p>The complete, replayable record of one agent playing one ARC-AGI-3
+  game. The agent can't read the rules — it plays by writing a
+  <b>world model</b> (a program that predicts the next frame), keeping
+  that model consistent with everything observed, planning inside it, and
+  letting reality veto it: the moment a real frame disagrees with the
+  model's prediction, the plan is cancelled and the model gets fixed.</p>
+
+  <h2>Start on the <span class="k">Now</span> tab</h2>
+  <p>It answers the two questions that matter: <b>(a)</b> how much of the
+  observed history the current model explains — one row per <i>attempt</i>
+  at a level (attempts end <span style="color:var(--gold)">cleared</span>,
+  <span style="color:var(--red)">died</span>, or abandoned; failed attempts
+  count as evidence too), with a green/red bar per transition — and
+  <b>(b)</b> the best current plan and how far it got.</p>
+
+  <h2>The main controls (left side)</h2>
+  <ul>
+  <li><b>Slider / <span class="k">&larr;</span><span class="k">&rarr;</span></b>
+    — step through <i>real time</i>: every action the agent actually took.
+    The big grid is the game screen after that action;
+    <span class="k">diff</span> outlines the cells the action changed; a
+    gold crosshair marks where the agent clicked.</li>
+  <li><b>Tick strip</b> — one tick per action:
+    <span class="legend" style="background:#4a5261"></span>normal,
+    <span class="legend" style="background:#ffc857"></span>level cleared,
+    <span class="legend" style="background:#ff5d5d"></span>death,
+    <span class="legend" style="background:#4ecb71"></span>win,
+    red dot = the model mispredicted here. The dropdown beside it swaps
+    this for a <b>model version's report card</b>: pick a version and every
+    tick shows whether that version explains that transition
+    (<span class="legend" style="background:#4ecb71"></span>yes
+    <span class="legend" style="background:#ff5d5d"></span>no
+    <span class="legend" style="background:#4a5261"></span>skipped).</li>
+  <li><b>Turn rail</b> (numbered chips) — the agent's <i>thinking cycles</i>.
+    Each chip is one observe&rarr;think&rarr;act round; dashed = a round of
+    pure thinking (no real actions). Click a chip to pin its details in the
+    right-hand tabs.</li>
+  <li><b>Purple = imagination.</b> "&#9654; simulate" buttons replay a plan
+    inside the model the agent had <i>at that moment</i>. The border turns
+    purple and the arrows scrub predicted frames; the caption says whether
+    each one matched reality or was never executed.
+    <span class="k">esc</span> exits.</li>
+  </ul>
+
+  <h2>The tabs (right side)</h2>
+  <ul>
+  <li><b>Turn</b> — the plan committed in this thinking cycle, the agent's
+    stated reason, and which step of it you're on.</li>
+  <li><b>Meta-actions</b> — what the agent did between actions, in order:
+    model checks (backtest), planning searches (bfs), with their outputs.</li>
+  <li><b>Model code</b> — the world model's source <i>as of the current
+    moment</i>, plus what changed in its latest edit.</li>
+  <li><b>Notes</b> — the agent's own scratchpad at that moment.</li>
+  <li><b>Mispredicts</b> — every point where reality contradicted the
+    model, with predicted-vs-actual frames side by side. These moments are
+    the engine of the whole method.</li>
+  </ul>
+  <p class="muted">Keys: <span class="k">&larr;</span>
+  <span class="k">&rarr;</span> step &middot; <span class="k">esc</span>
+  exit simulation &middot; <span class="k">?</span> toggle this help.
+  Generated by <span class="k">arc3.py timeline</span>; see
+  arc/agi3/README.md for the harness itself.</p>
+  <p><button id="helpclose">close</button></p>
+</div>
+<main>
+  <div id="left">
+    <canvas id="grid" width="512" height="512"></canvas>
+    <div id="ghostbar">
+      <span class="glabel" id="ghost-label"></span>
+      <input type="range" id="ghost-seek" min="0" value="0">
+      <span id="ghost-t" style="font-family:var(--mono)"></span>
+      <button id="ghost-exit">exit (esc)</button>
+    </div>
+    <div id="controls">
+      <button id="prev" title="left arrow">&larr;</button>
+      <button id="next" title="right arrow">&rarr;</button>
+      <input type="range" id="seek" min="0" value="0">
+      <span id="tlabel" style="font-family:var(--mono);font-size:12px"></span>
+      <button id="diff" title="highlight cells changed by this action">diff</button>
+    </div>
+    <div id="stripbar">
+      <canvas id="strip" width="442" height="26"></canvas>
+      <select id="stripmode" title="colour the strip by real events, or by
+        how much of reality a given model version explains"></select>
+    </div>
+    <div id="turnrail"></div>
+    <div id="caption"></div>
+  </div>
+  <div id="right">
+    <nav class="tabs">
+      <button data-tab="now" class="active">Now</button>
+      <button data-tab="turn">Turn</button>
+      <button data-tab="tools">Meta-actions</button>
+      <button data-tab="model">Model code</button>
+      <button data-tab="notes">Notes</button>
+      <button data-tab="mis">Mispredicts</button>
+    </nav>
+    <div id="tab-now" class="tab active"></div>
+    <div id="tab-turn" class="tab"></div>
+    <div id="tab-tools" class="tab"></div>
+    <div id="tab-model" class="tab"></div>
+    <div id="tab-notes" class="tab"></div>
+    <div id="tab-mis" class="tab"></div>
+  </div>
+</main>
+<script>
+const DATA = /*__DATA__*/null;
+const PALETTE = ["#000000","#0074D9","#FF4136","#2ECC40","#FFDC00","#8d8d8d",
+  "#F012BE","#FF851B","#7FDBFF","#870C25","#3D9970","#39CCCC","#01FF70",
+  "#85144B","#B10DC9","#FFFFFF"];
+const HEX = "0123456789abcdef";
+const esc = s => String(s ?? "").replace(/[&<>]/g,
+  c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+
+const frames = [];
+if (DATA.initial) frames.push(DATA.initial);
+for (const s of DATA.steps) frames.push(s.grid);
+const N = frames.length - 1;
+let t = 0, diffMode = true;
+let pinnedTurn = null;      // turn rail selection; null = follow the slider
+let ghost = null;           // {g: DATA.ghosts[i], idx}
+let stripMode = -1;         // -1 = events, else snapshot index into verdicts
+
+const turnNumbers = [...new Set([
+  ...DATA.steps.map(s => s.turn),
+  ...DATA.tools.map(x => x.turn),
+  ...DATA.turns.map(x => x.turn)])].sort((a, b) => a - b);
+const stepsOfTurn = k => DATA.steps.filter(s => s.turn === k);
+
+// ---------- header ----------
+document.getElementById("h-game").textContent = DATA.meta.game;
+document.getElementById("h-agent").textContent = DATA.meta.agent ?? "?";
+document.getElementById("h-state").textContent = DATA.meta.state;
+document.getElementById("h-levels").textContent =
+  (DATA.meta.level ?? 0) + "/" + DATA.meta.win_levels;
+document.getElementById("h-actions").textContent = DATA.steps.length;
+document.getElementById("h-turns").textContent = turnNumbers.length;
+document.getElementById("h-mis").textContent =
+  Object.keys(DATA.mispredicts).length;
+
+// ---------- canvas ----------
+const cnv = document.getElementById("grid");
+function drawGrid(canvas, hexRows, prevRows, click) {
+  const c = canvas.getContext("2d");
+  const size = canvas.width, n = hexRows.length, cell = size / n;
+  c.clearRect(0, 0, size, size);
+  for (let r = 0; r < n; r++)
+    for (let col = 0; col < hexRows[r].length; col++) {
+      c.fillStyle = PALETTE[HEX.indexOf(hexRows[r][col])];
+      c.fillRect(col * cell, r * cell, cell, cell);
+    }
+  if (prevRows) {
+    c.strokeStyle = "#ffffff"; c.lineWidth = 1;
+    for (let r = 0; r < n; r++) {
+      if (hexRows[r] === prevRows[r]) continue;
+      for (let col = 0; col < hexRows[r].length; col++)
+        if (hexRows[r][col] !== prevRows[r][col])
+          c.strokeRect(col * cell + .5, r * cell + .5, cell - 1, cell - 1);
+    }
+  }
+  if (click) {
+    c.strokeStyle = "#ffc857"; c.lineWidth = 2;
+    const cx = (click[0] + .5) * cell, cy = (click[1] + .5) * cell;
+    c.beginPath(); c.arc(cx, cy, cell * 1.4, 0, 7); c.stroke();
+    c.beginPath();
+    c.moveTo(cx - cell * 2.4, cy); c.lineTo(cx + cell * 2.4, cy);
+    c.moveTo(cx, cy - cell * 2.4); c.lineTo(cx, cy + cell * 2.4);
+    c.stroke();
+  }
+}
+function countDiff(a, b) {
+  let n = 0;
+  for (let r = 0; r < a.length; r++) {
+    if (a[r] === b[r]) continue;
+    for (let c = 0; c < a[r].length; c++) if (a[r][c] !== b[r][c]) n++;
+  }
+  return n;
+}
+
+// ---------- strip ----------
+const strip = document.getElementById("strip");
+function drawStrip() {
+  const c = strip.getContext("2d"), w = strip.width, h = strip.height;
+  c.clearRect(0, 0, w, h);
+  const px = i => N ? (i / N) * (w - 2) + 1 : 1;
+  let band = 0;
+  for (let i = 0; i < DATA.steps.length; i++) {
+    const s = DATA.steps[i];
+    if (i === 0 || s.turn !== DATA.steps[i - 1].turn) band++;
+    c.fillStyle = band % 2 ? "#1b1e24" : "#22262e";
+    c.fillRect(px(i), 0, px(i + 1) - px(i) + 1, h);
+  }
+  const marks = stripMode >= 0 ? DATA.verdicts[stripMode].marks : null;
+  for (let i = 0; i < DATA.steps.length; i++) {
+    const s = DATA.steps[i], x = px(i + 1);
+    let col;
+    if (marks) {
+      col = {g: "#4ecb71", r: "#ff5d5d", e: "#c77dff",
+             s: "#4a5261"}[marks[i]] ?? "#4a5261";
+    } else {
+      col = "#4a5261";
+      if (s.level_up) col = "#ffc857";
+      if (s.dead) col = "#ff5d5d";
+      if (s.win) col = "#4ecb71";
+    }
+    c.fillStyle = col;
+    c.fillRect(x - 1, 4, 2, h - 12);
+    if (!marks && DATA.mispredicts[String(s.i)]) {
+      c.fillStyle = "#ff5d5d";
+      c.beginPath(); c.arc(x, h - 5, 2.5, 0, 7); c.fill();
+    }
+  }
+  c.fillStyle = "#4d9fff";
+  c.fillRect(px(t) - 1.5, 0, 3, h);
+}
+strip.addEventListener("click", e => {
+  const r = strip.getBoundingClientRect();
+  seekTo(Math.round(((e.clientX - r.left) / r.width) * N));
+});
+
+// strip mode select: events | model versions with verdicts
+const modeSel = document.getElementById("stripmode");
+{
+  const opt = document.createElement("option");
+  opt.value = "-1"; opt.textContent = "events";
+  modeSel.appendChild(opt);
+  DATA.verdicts.forEach((v, i) => {
+    if (!v.marks) return;
+    const s = DATA.snapshots[v.snap];
+    const o = document.createElement("option");
+    o.value = String(i);
+    o.textContent = `v${v.snap} @ t=${s.t} — ${v.note}`;
+    modeSel.appendChild(o);
+  });
+  modeSel.addEventListener("change", () => {
+    stripMode = +modeSel.value; drawStrip(); renderCaption();
+  });
+}
+
+// ---------- turn rail ----------
+const rail = document.getElementById("turnrail");
+function buildRail() {
+  rail.innerHTML = "";
+  for (const k of turnNumbers) {
+    const cell = document.createElement("div");
+    const ss = stepsOfTurn(k);
+    cell.className = "turncell";
+    if (!ss.length) cell.classList.add("zero");
+    if (ss.some(s => DATA.mispredicts[String(s.i)] || s.dead))
+      cell.classList.add("mis");
+    if (ss.some(s => s.level_up || s.win)) cell.classList.add("lvl");
+    cell.textContent = k;
+    cell.title = ss.length
+      ? `turn ${k}: steps ${ss[0].i}–${ss[ss.length - 1].i}`
+      : `turn ${k}: deliberation only (no real actions)`;
+    cell.addEventListener("click", () => {
+      pinnedTurn = k;
+      const s0 = ss[0];
+      if (s0) { t = s0.i + 1; }   // jump to the turn's first real step
+      renderAll();
+    });
+    rail.appendChild(cell);
+  }
+}
+function markRail() {
+  const cur = curTurn();
+  [...rail.children].forEach((el, j) =>
+    el.classList.toggle("cur", turnNumbers[j] === cur));
+}
+
+// ---------- tabs ----------
+document.querySelectorAll("nav.tabs button").forEach(b =>
+  b.addEventListener("click", () => {
+    document.querySelectorAll("nav.tabs button").forEach(x =>
+      x.classList.toggle("active", x === b));
+    document.querySelectorAll(".tab").forEach(x =>
+      x.classList.toggle("active", x.id === "tab-" + b.dataset.tab));
+  }));
+
+// ---------- shared helpers ----------
+const stepAt = i => DATA.steps[i - 1];
+function curTurn() {
+  if (pinnedTurn !== null) return pinnedTurn;
+  if (t > 0) return stepAt(t).turn;
+  return DATA.steps[0] ? DATA.steps[0].turn : (turnNumbers[0] ?? 0);
+}
+function fmtAction(a, x, y) {
+  const names = {0:"RESET",1:"ACTION1 (up?)",2:"ACTION2 (down?)",
+    3:"ACTION3 (left?)",4:"ACTION4 (right?)",5:"ACTION5",6:"ACTION6 click",
+    7:"ACTION7 (undo?)"};
+  let out = names[a] ?? "ACTION" + a;
+  if (a === 6) out += ` (${x},${y})`;
+  return out;
+}
+
+// ---------- ghost mode ----------
+const ghostBar = document.getElementById("ghostbar");
+function enterGhost(gi) {
+  const g = DATA.ghosts[gi];
+  if (!g || !g.frames.length) return;
+  ghost = {g, idx: 0};
+  const seek = document.getElementById("ghost-seek");
+  seek.max = g.frames.length - 1; seek.value = 0;
+  renderAll();
+}
+function exitGhost() { ghost = null; renderAll(); }
+window.enterGhost = enterGhost;
+document.getElementById("ghost-exit").addEventListener("click", exitGhost);
+document.getElementById("ghost-seek").addEventListener("input", e => {
+  if (ghost) { ghost.idx = +e.target.value; renderAll(); }
+});
+
+// ---------- panels ----------
+function metaEventsOfTurn(k) {
+  const evts = [];
+  for (const x of DATA.tools) if (x.turn === k)
+    evts.push({seq: x.seq ?? 0, kind: "tool", it: x});
+  for (const x of DATA.turns) if (x.turn === k)
+    evts.push({seq: x.seq ?? 0, kind: "commit", it: x});
+  return evts.sort((a, b) => a.seq - b.seq);
+}
+function ghostOfCommit(cm) {
+  for (let i = 0; i < DATA.ghosts.length; i++) {
+    const g = DATA.ghosts[i];
+    if (g.kind === "commit" && g.turn === cm.turn &&
+        g.at_step === cm.at_step) return i;
+  }
+  return -1;
+}
+
+// ---------- Now view: current model vs all episodes + frontier plan ----
+// The history segments into EPISODES (attempts): each ends cleared (level
+// up), died, or abandoned (voluntary RESET). Every episode — failed ones
+// included — is backtest evidence for the current model.
+function computeEpisodes() {
+  const eps = [];
+  let cur = null;
+  for (let i = 0; i < DATA.steps.length; i++) {
+    const s = DATA.steps[i];
+    const levelBefore = i > 0 ? DATA.steps[i - 1].level
+                              : (DATA.meta.initial_level ?? 0);
+    if (!cur) cur = {level: levelBefore, start: i};
+    if (s.win) { cur.end = i; cur.outcome = "WIN"; eps.push(cur); cur = null; }
+    else if (s.level_up) {
+      cur.end = i; cur.outcome = "cleared"; eps.push(cur); cur = null;
+    } else if (s.dead) {
+      cur.end = i; cur.outcome = "died"; eps.push(cur); cur = null;
+    } else if (s.action === 0 && i > cur.start) {
+      // a voluntary reset abandons the attempt; a RESET that *opens* an
+      // attempt (recovery right after a death) is just its first step
+      cur.end = i; cur.outcome = "abandoned"; eps.push(cur); cur = null;
+    }
+  }
+  if (cur) {
+    cur.end = DATA.steps.length - 1; cur.outcome = "in progress";
+    eps.push(cur);
+  }
+  let n = 0, lastLevel = -1;
+  for (const e of eps) {
+    n = e.level === lastLevel ? n + 1 : 1;
+    e.attempt = n; lastLevel = e.level;
+  }
+  return eps;
+}
+const EPISODES = computeEpisodes();
+const currentVerdict = (() => {
+  const withMarks = DATA.verdicts.filter(v => v.marks);
+  return withMarks.length ? withMarks[withMarks.length - 1] : null;
+})();
+
+function latestGhostIndex() {
+  let best = -1;
+  DATA.ghosts.forEach((g, i) => {
+    if (!g.frames.length) return;
+    const b = best >= 0 ? DATA.ghosts[best] : null;
+    if (!b || g.at_step > b.at_step ||
+        (g.at_step === b.at_step && g.kind === "commit")) best = i;
+  });
+  return best;
+}
+function executedPrefix(g) {
+  let j = 0;
+  while (j < g.frames.length && ghostRealFrame(g, j)) j++;
+  return j;
+}
+
+function renderNowTab() {
+  const el = document.getElementById("tab-now");
+  let html = "";
+
+  // (a) current model vs every observed episode
+  const snapLast = DATA.snapshots[DATA.snapshots.length - 1];
+  html += `<div class="card"><h3>current model vs everything observed</h3>`;
+  if (!currentVerdict) {
+    html += `<div class="muted">no model yet (or timeline was built with
+      --fast)</div></div>`;
+  } else {
+    const s = DATA.snapshots[currentVerdict.snap];
+    html += `<div><b>${esc(currentVerdict.note)}</b>
+      <span class="muted">— model of ${esc(s.label)}; every attempt below,
+      failed ones included, is evidence it must explain</span></div>
+      <table style="width:100%;border-collapse:collapse;margin-top:8px;
+        font-size:12.5px">
+      <tr class="muted" style="text-align:left">
+        <th>level</th><th>attempt</th><th>steps</th><th>outcome</th>
+        <th style="width:45%">model verdicts</th></tr>`;
+    EPISODES.forEach((e, i) => {
+      const n = e.end - e.start + 1;
+      const badge = {
+        cleared: `<span style="color:var(--gold)">cleared</span>`,
+        WIN: `<span style="color:var(--green)">WIN</span>`,
+        died: `<span style="color:var(--red)">died</span>`,
+        abandoned: `<span class="muted">abandoned (reset)</span>`,
+        "in progress": `<span style="color:var(--accent)">in progress</span>`,
+      }[e.outcome];
+      html += `<tr style="cursor:pointer" onclick="seekTo(${e.start + 1})">
+        <td>${e.level}</td><td>#${e.attempt}</td>
+        <td class="muted">${e.start}&ndash;${e.end} (${n})</td>
+        <td>${badge}</td>
+        <td><canvas class="epbar" data-ep="${i}" width="220" height="10"
+          style="width:220px;height:10px"></canvas></td></tr>`;
+    });
+    html += `</table></div>`;
+  }
+
+  // (b) best current planned solution, from the frontier
+  html += `<div class="card"><h3>best current planned solution</h3>`;
+  if (DATA.meta.state === "WIN") {
+    html += `<div style="color:var(--green)"><b>game complete</b>
+      <span class="muted">— no frontier to plan from</span></div>`;
+  } else {
+    const gi = latestGhostIndex();
+    if (gi < 0) {
+      html += `<div class="muted">no plan yet — no BFS run or committed plan
+        could be simulated</div>`;
+    } else {
+      const g = DATA.ghosts[gi];
+      const exec = executedPrefix(g);
+      const voided = exec < g.frames.length &&
+        DATA.steps[g.at_step + exec] !== undefined &&
+        DATA.steps[g.at_step + exec].turn === g.turn;
+      html += `<div><b>${g.kind === "bfs" ? "BFS plan" : "committed plan"}
+        </b> from t=${g.at_step} (turn ${g.turn}): ${g.plan.length}
+        action(s)</div><div style="margin:6px 0">`;
+      g.plan.forEach((p, j) => {
+        const cls = j < exec ? "done" : "";
+        html += `<span class="plan-step ${cls}">${p[0]}${p[0] === 6 ?
+          `(${p[1]},${p[2]})` : ""}</span>`;
+      });
+      html += `</div>`;
+      if (voided || (exec < g.plan.length && exec < g.frames.length &&
+                     g.kind === "commit")) {
+        html += `<div style="color:var(--red)">plan is DEAD — mispredicted
+          after ${exec} executed step(s); the model needs fixing before
+          planning again</div>`;
+      } else if (exec >= g.plan.length) {
+        html += `<div class="muted">fully executed — re-observe and plan the
+          next move</div>`;
+      } else {
+        html += `<div class="muted">${exec} of ${g.plan.length} step(s)
+          executed so far</div>`;
+      }
+      html += `<div style="margin-top:6px"><button class="ghostbtn"
+        onclick="enterGhost(${gi})">&#9654; simulate this plan</button>
+        <span class="muted">${g.error ?
+          "sim stopped early: " + esc(g.error) : ""}</span></div>`;
+    }
+  }
+  html += `</div>`;
+  el.innerHTML = html;
+
+  // paint the per-episode verdict bars for the CURRENT model
+  if (currentVerdict) {
+    document.querySelectorAll("canvas.epbar").forEach(bar => {
+      const e = EPISODES[+bar.dataset.ep];
+      const c = bar.getContext("2d"), w = bar.width, h = bar.height;
+      const n = e.end - e.start + 1, seg = w / n;
+      for (let j = 0; j < n; j++) {
+        const m = currentVerdict.marks[e.start + j];
+        c.fillStyle = {g: "#4ecb71", r: "#ff5d5d", e: "#c77dff",
+                       s: "#4a5261"}[m] ?? "#4a5261";
+        c.fillRect(j * seg, 0, Math.max(seg - .5, .8), h);
+      }
+    });
+  }
+}
+
+function renderTurnTab() {
+  const el = document.getElementById("tab-turn");
+  const k = curTurn();
+  const ss = stepsOfTurn(k);
+  const commits = DATA.turns.filter(x => x.turn === k);
+  let html = `<div class="card"><h3>turn ${k}
+    ${pinnedTurn !== null ? '<span class="muted">(pinned — scrub to unpin)'
+      + '</span>' : ""}</h3>`;
+  html += ss.length
+    ? `<div class="muted">real steps ${ss[0].i}&ndash;${ss[ss.length-1].i}
+       (${ss.length} action${ss.length > 1 ? "s" : ""})</div>`
+    : `<div class="muted">deliberation-only turn — no real actions taken;
+       env time frozen</div>`;
+  html += `</div>`;
+  for (const cm of commits) {
+    const gi = ghostOfCommit(cm);
+    const g = gi >= 0 ? DATA.ghosts[gi] : null;
+    html += `<div class="card"><h3>committed plan</h3>
+      <div style="margin-bottom:6px"><span class="muted">reason</span>
+      <b>${esc(cm.reason) || "&mdash;"}</b></div><div>`;
+    cm.plan.forEach((p, j) => {
+      const stepIndex = cm.at_step + j;
+      const cls = stepIndex < t ? "done" : (stepIndex === t - 1 ? "now" : "");
+      html += `<span class="plan-step ${cls}">${p[0]}${p[0] === 6 ?
+        `(${p[1]},${p[2]})` : ""}</span>`;
+    });
+    html += `</div>`;
+    if (g && g.frames.length) {
+      html += `<div style="margin-top:8px"><button class="ghostbtn"
+        onclick="enterGhost(${gi})">&#9654; simulate this plan in the model
+        of that moment</button>
+        <span class="muted">(${g.frames.length} predicted frame(s)${
+        g.error ? "; sim stopped: " + esc(g.error) : ""})</span></div>`;
+    } else if (g && g.error) {
+      html += `<div class="muted" style="margin-top:8px">no ghost:
+        ${esc(g.error)}</div>`;
+    }
+    html += `</div>`;
+  }
+  if (t > 0 && !pinnedTurn) {
+    const s = stepAt(t);
+    html += `<div class="card"><h3>this step</h3>
+      <pre>#${s.i}  ${esc(fmtAction(s.action, s.x, s.y))}
+state=${esc(s.state)}  level=${s.level}${s.level_up ? "  LEVEL_UP" : ""}${
+  s.dead ? "  DEAD" : ""}${s.win ? "  WIN" : ""}</pre></div>`;
+  }
+  el.innerHTML = html;
+}
+
+function renderToolsTab() {
+  const el = document.getElementById("tab-tools");
+  const k = curTurn();
+  const evts = metaEventsOfTurn(k);
+  let html = `<div class="card"><h3>deliberation, in order — turn ${k}</h3>`;
+  if (!evts.length) html += `<div class="muted">nothing recorded (pre-
+    instrumentation run, or agent-side file edits — see Model code)</div>`;
+  evts.forEach((e, j) => {
+    if (e.kind === "commit") {
+      html += `<div class="metaevt"><span class="idx">${j + 1}.</span>
+        <b style="color:var(--gold)">commit</b>
+        <span class="muted">${e.it.plan.length} action(s) —
+        ${esc(e.it.reason)}</span></div>`;
+    } else {
+      const it = e.it;
+      html += `<details><summary><span class="idx">${j + 1}.</span>
+        <b>${esc(it.name)}</b>
+        <span class="muted">${esc(JSON.stringify(it.args))}</span>
+        ${it.is_error ? '<span class="err">exit&ne;0</span>' : ""}
+        ${it.ghost !== null && it.ghost !== undefined ?
+          `<button class="ghostbtn" onclick="event.preventDefault();
+           enterGhost(${it.ghost})">&#9654; rollout</button>` : ""}
+        </summary>
+        <pre>${esc(it.output ?? "(no output captured)")}</pre></details>`;
+    }
+  });
+  html += `</div>`;
+  el.innerHTML = html;
+}
+
+function snapAt(tt) {
+  let best = null;
+  for (const s of DATA.snapshots) if (s.t <= tt) best = s; else break;
+  return best;
+}
+function resolveFile(snap, name) {
+  const idx = DATA.snapshots.indexOf(snap);
+  for (let i = idx; i >= 0; i--) {
+    const c = DATA.snapshots[i].files[name];
+    if (c !== null && c !== undefined) return c;
+  }
+  return null;
+}
+let modelFile = null;
+function renderModelTab() {
+  const el = document.getElementById("tab-model");
+  const snap = snapAt(t);
+  if (!snap) {
+    el.innerHTML = `<div class="card muted">no workdir snapshots yet</div>`;
+    return;
+  }
+  const names = [...new Set(DATA.snapshots.flatMap(s =>
+    Object.keys(s.files)))].filter(n => n.endsWith(".py")).sort();
+  if (!modelFile || !names.includes(modelFile))
+    modelFile = names.find(n => n.startsWith("world_model")) ?? names[0];
+  let html = `<div class="card"><h3>snapshot &mdash; ${esc(snap.label)}
+    <span class="muted">(${esc(snap.sha)})</span></h3>`;
+  if (!names.length) {
+    html += `<div class="muted">no .py files yet — the agent hasn't written
+      a world model</div></div>`;
+    el.innerHTML = html; return;
+  }
+  html += `<select id="mfile">` + names.map(n =>
+    `<option ${n === modelFile ? "selected" : ""}>${esc(n)}</option>`)
+    .join("") + `</select>`;
+  const vd = DATA.verdicts.find(v =>
+    v.snap === DATA.snapshots.indexOf(snap));
+  if (vd && vd.note) html += ` <span class="muted">vs reality:
+    ${esc(vd.note)} — pick this version in the strip dropdown to paint
+    it</span>`;
+  const diff = snap.diffs[modelFile];
+  if (diff) {
+    html += `<h3 style="margin-top:10px">changed in this snapshot</h3><pre>` +
+      diff.split("\n").map(l => {
+        const cls = l.startsWith("+") ? "diffline-add" :
+          l.startsWith("-") ? "diffline-del" :
+          l.startsWith("@@") ? "diffline-hunk" : "";
+        return `<span class="${cls}">${esc(l)}</span>`;
+      }).join("\n") + `</pre>`;
+  } else {
+    html += `<div class="muted" style="margin-top:8px">unchanged in this
+      snapshot</div>`;
+  }
+  const content = resolveFile(snap, modelFile);
+  html += `<h3 style="margin-top:10px">full source at t=${snap.t}</h3>
+    <pre>${esc(content ?? "(file absent at this time)")}</pre></div>`;
+  el.innerHTML = html;
+  document.getElementById("mfile").addEventListener("change", e => {
+    modelFile = e.target.value; renderModelTab();
+  });
+}
+
+function renderNotesTab() {
+  const el = document.getElementById("tab-notes");
+  const snap = snapAt(t);
+  const content = snap ? resolveFile(snap, "notes.md") : null;
+  el.innerHTML = `<div class="card"><h3>notes.md at t=${snap ? snap.t : 0}
+    </h3><pre>${esc(content ?? "(no notes captured yet)")}</pre></div>`;
+}
+
+function renderMisTab() {
+  const el = document.getElementById("tab-mis");
+  const keys = Object.keys(DATA.mispredicts).map(Number).sort((a, b) => a - b);
+  let html = `<div class="card"><h3>all mispredictions</h3><div class="mislist">`;
+  html += keys.length ? keys.map(k =>
+    `<button onclick="seekTo(${k + 1})">#${k}</button>`).join("") :
+    `<span class="muted">none — the model never disagreed with reality</span>`;
+  html += `</div></div>`;
+  const cur = t > 0 ? DATA.mispredicts[String(stepAt(t).i)] : null;
+  if (cur) {
+    html += `<div class="card"><h3>at this step</h3>
+      <pre>${esc(cur.surprise)}</pre>`;
+    if (cur.predicted) {
+      const s = stepAt(t);
+      html += `<div class="muted">${countDiff(s.grid, cur.predicted)} cell(s)
+        wrong — model's predicted frame (left) vs actual (right):</div>
+        <div style="display:flex;gap:10px;margin-top:8px">
+        <canvas class="mini" id="mis-pred" width="256" height="256"></canvas>
+        <canvas class="mini" id="mis-act" width="256" height="256"></canvas>
+        </div>`;
+    }
+    html += `</div>`;
+  }
+  el.innerHTML = html;
+  if (cur && cur.predicted) {
+    const s = stepAt(t);
+    drawGrid(document.getElementById("mis-pred"), cur.predicted, s.grid);
+    drawGrid(document.getElementById("mis-act"), s.grid, cur.predicted);
+  }
+}
+
+// ---------- captions + master render ----------
+// A ghost frame is only comparable to reality where reality actually
+// executed the same action of the same turn's plan — after a voided plan
+// or an uncommitted BFS rollout, the real trajectory took a different path.
+function ghostRealFrame(g, idx) {
+  const s = DATA.steps[g.at_step + idx];
+  if (!s || s.turn !== g.turn) return null;
+  const p = g.plan[idx];
+  if (!p || s.action !== p[0]) return null;
+  if (s.action === 6 && (s.x !== p[1] || s.y !== p[2])) return null;
+  return frames[g.at_step + idx + 1];
+}
+
+function renderCaption() {
+  const cap = document.getElementById("caption");
+  if (ghost) {
+    const {g, idx} = ghost;
+    const real = ghostRealFrame(g, idx);
+    let vs;
+    if (real) {
+      const d = countDiff(real, g.frames[idx]);
+      vs = d === 0 ? `<span style="color:var(--green)">matches reality</span>`
+        : `<span style="color:var(--red)">diverges from reality by ${d}
+           cell(s)</span>`;
+    } else {
+      const why = g.kind === "commit"
+        ? " (plan voided or turn ended before this step)" : "";
+      vs = `<span style="color:var(--ghost)">never executed — imagination
+        only${why}</span>`;
+    }
+    cap.innerHTML = `<b style="color:var(--ghost)">GHOST ${g.kind}</b>
+      turn ${g.turn}, predicted frame ${idx + 1}/${g.frames.length}
+      (from t=${g.at_step}) — ${vs}`;
+    return;
+  }
+  const s = t > 0 ? stepAt(t) : null;
+  if (!s) {
+    cap.innerHTML = `<b>t=0</b> — initial frame (before any action)`;
+  } else {
+    cap.innerHTML = `<b>#${s.i} ${esc(fmtAction(s.action, s.x, s.y))}</b>
+      &rarr; state=${esc(s.state)} level=${s.level}` +
+      (s.level_up ? ` <span style="color:var(--gold)">LEVEL_UP</span>` : "") +
+      (s.dead ? ` <span style="color:var(--red)">DEAD</span>` : "") +
+      (s.win ? ` <span style="color:var(--green)">WIN</span>` : "") +
+      (DATA.mispredicts[String(s.i)] ?
+        ` <span style="color:var(--red)">&#9888; MISPREDICTED</span>` : "");
+  }
+  if (stripMode >= 0) {
+    const v = DATA.verdicts[stripMode];
+    cap.innerHTML += `\n<span class="muted">strip: model v${v.snap} vs
+      reality — ${esc(v.note)} (green explained / red wrong / purple
+      raised / grey skipped)</span>`;
+  }
+}
+
+function renderAll() {
+  document.getElementById("seek").value = t;
+  document.getElementById("tlabel").textContent = `t=${t}/${N}`;
+  ghostBar.classList.toggle("active", !!ghost);
+  cnv.classList.toggle("ghosting", !!ghost);
+  if (ghost) {
+    const {g, idx} = ghost;
+    const real = ghostRealFrame(g, idx);
+    document.getElementById("ghost-label").textContent =
+      `${g.kind} ghost, turn ${g.turn}`;
+    document.getElementById("ghost-t").textContent =
+      `${idx + 1}/${g.frames.length}`;
+    drawGrid(cnv, g.frames[idx], real, null);
+  } else {
+    const prev = diffMode && t > 0 ? frames[t - 1] : null;
+    const s = t > 0 ? stepAt(t) : null;
+    const click = s && s.action === 6 ? [s.x, s.y] : null;
+    drawGrid(cnv, frames[t], prev, click);
+  }
+  drawStrip(); markRail(); renderCaption();
+  renderNowTab(); renderTurnTab(); renderToolsTab(); renderModelTab();
+  renderNotesTab(); renderMisTab();
+}
+function seekTo(x) {
+  pinnedTurn = null; ghost = null;
+  t = Math.max(0, Math.min(N, x));
+  renderAll();
+}
+window.seekTo = seekTo;
+
+document.getElementById("seek").max = N;
+document.getElementById("seek").addEventListener("input",
+  e => seekTo(+e.target.value));
+document.getElementById("prev").addEventListener("click", () => nav(-1));
+document.getElementById("next").addEventListener("click", () => nav(1));
+function nav(d) {
+  if (ghost) {
+    ghost.idx = Math.max(0, Math.min(ghost.g.frames.length - 1,
+                                     ghost.idx + d));
+    document.getElementById("ghost-seek").value = ghost.idx;
+    renderAll();
+  } else seekTo(t + d);
+}
+const diffBtn = document.getElementById("diff");
+diffBtn.classList.add("on");
+diffBtn.addEventListener("click", () => {
+  diffMode = !diffMode; diffBtn.classList.toggle("on", diffMode); renderAll();
+});
+// ---------- help ----------
+const help = document.getElementById("help");
+const toggleHelp = () => help.classList.toggle("open");
+document.getElementById("helpbtn").addEventListener("click", toggleHelp);
+document.getElementById("helpclose").addEventListener("click", toggleHelp);
+try {
+  if (!localStorage.getItem("arc3-timeline-seen")) {
+    help.classList.add("open");
+    localStorage.setItem("arc3-timeline-seen", "1");
+  }
+} catch (e) { /* file:// without storage — fine, help stays behind ? */ }
+
+document.addEventListener("keydown", e => {
+  if (e.key === "ArrowLeft") nav(-1);
+  if (e.key === "ArrowRight") nav(1);
+  if (e.key === "?") toggleHelp();
+  if (e.key === "Escape") {
+    if (help.classList.contains("open")) help.classList.remove("open");
+    else if (ghost) exitGhost();
+  }
+});
+buildRail();
+renderAll();
+</script>
+</body>
+</html>

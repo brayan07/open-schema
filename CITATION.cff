@@ -1,0 +1,14 @@
+cff-version: 1.2.0
+message: "If you use this work, please cite it as below."
+title: "open-schema: an open replication of the Schema ARC-AGI-3 harness,
+  with single-run no-fallback results"
+authors:
+  - family-names: Jaramillo
+    given-names: Brayan
+type: software
+year: 2026
+url: https://github.com/USERNAME/open-schema
+abstract: >
+  Reconstruction of the unreleased Schema harness for ARC-AGI-3 from its
+  50 published gameplay trajectories, validated against those traces,
+  plus sealed single-run no-fallback evaluations on the public game set.
