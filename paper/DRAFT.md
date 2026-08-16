@@ -141,6 +141,22 @@ Observations from the completed runs:
 
 ## 6. Related work
 
+**Executable World Models for ARC-AGI-3** (Rodionov, SingularityNET;
+arXiv:2605.05138, May 6 2026) predates Schema by two months and states
+the same core loop: an executable Python world model, a verifier
+requiring the model to reproduce all recorded observations, plan
+execution with per-step prediction checking that halts on divergence,
+and an explicit refactoring pressure toward shared abstractions. With
+GPT-5.4/Codex it reports a mean 32.58% RHAE over the 25 public games —
+under an honest protocol this work follows: single recorded runs, no
+best-of-N, interruptions reported as-is. The method family's trajectory
+is itself informative: from 32.6% (May, GPT-5.4) to ~99% (July, Schema,
+Opus 4.8 + Fable 5, best-of-two) to 100% (late July, Tycho, Opus 5,
+single-run) — the public set moved from "method demonstrated" to
+saturated within one frontier-model generation, which sharpens both the
+harness-vs-model attribution question and the need for the semi-private
+set.
+
 **Tycho** (arXiv:2607.28287, July 30 2026; open source) formalizes
 ARC-AGI-3 games as rendered deterministic Moore machines and reports —
 in one matched public-set run per orchestration policy — Opus 4.8 at
