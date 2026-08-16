@@ -77,11 +77,16 @@ Three independent checks:
    recorded histories (GPT family 93–99%). The three non-runners are
    release artifacts (two files broken by a redaction line; one
    trajectory shipped no model file).
-3. **Residue attribution**: [TODO — crosscheck_mispredicts.py: fraction
-   of our red transitions coinciding with the original harness's own
-   recorded `model_mispredicted` events; preliminary indication is that
-   most residue is the traces' own recorded imperfection, bounding
-   genuine contract mismatch near zero.]
+3. **Residue attribution**: of 21,378 transitions checked across the 47
+   runnable models, 1,014 are red in our replay; 557 (54.9%) coincide
+   exactly with steps where the original harness itself recorded a
+   `model_mispredicted` event. The unexplained residue is 457
+   transitions (**2.14%**) — a loose upper bound on genuine contract
+   mismatch, as it still contains final-model-vs-early-history cases
+   (transitions that passed under earlier model versions, so no
+   contemporaneous mispredict was recorded, but that the final released
+   file no longer reproduces). Contract fidelity is therefore bounded
+   below by 97.9%, with the true figure likely higher.
 
 The sensitivity of check (2) is itself evidence: each recovered semantic
 moved the number in large steps (no `np` → 0%; no `ENTRY_GRID` → all
