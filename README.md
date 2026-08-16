@@ -28,7 +28,8 @@ harness. This project:
 | ft09 | 6/6 WIN | 75 (208) | **100.00%** | 0.9 h | clean; 1 logged infra rerun |
 | ar25 | 8/8 WIN | 265 (748) | **100.00%** | 0.55 h | clean |
 | tr87 | 6/6 WIN | 407 (414) | **83.89%** | 1.03 h | clean |
-| *remaining 20* | *in progress* | | | | |
+| tn36 | 1/7 STOPPED | 2988 (210) | **0.00%** | 1.13 h | clean |
+| *remaining 19* | *in progress* | | | | |
 
 Reference: Schema's best-of-two per-game results for these games:
 sb26 98.63%, ls20 100%, ft09 100%, ar25 100%, tr87 100%. The single-run
