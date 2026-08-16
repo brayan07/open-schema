@@ -31,9 +31,10 @@ harness. This project:
 | tn36 | 1/7 STOPPED | 2988 (210) | **0.00%** | 1.13 h | clean |
 | tu93 | 9/9 WIN | 204 (462) | **100.00%** | 1.24 h | clean |
 | lp85 | 8/8 WIN | 105 (388) | **100.00%** | 1.2 h | clean; interrupted+resumed (logged) |
-| *remaining 17* | *in progress* | | | | |
+| r11l | 6/6 WIN | 79 (233) | **100.00%** | 1.44 h | clean; interrupted+resumed (logged) |
+| *remaining 16* | *in progress* | | | | |
 
-**Running mean over 8 completed games: 85.49%** (six 100s, one 83.89, one 0).
+**Running mean over 9 completed games: 87.10%** (seven 100s, one 83.89, one 0).
 
 Reference: Schema's best-of-two per-game results for these games:
 sb26 98.63%, ls20 100%, ft09 100%, ar25 100%, tr87 100%. The single-run
