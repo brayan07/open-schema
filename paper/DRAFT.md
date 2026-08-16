@@ -16,9 +16,12 @@ single-run (non best-of-two) figure, were not published. We reconstruct
 the harness from the traces themselves, validate the reconstruction
 against all 50 trajectories (exact reproduction of every released score;
 47/50 released world models execute unmodified in our sandbox), and
-report the first single-run, no-fallback results on the public set,
-produced by sealed agents whose transcripts are audited for information
-leakage and published. On the games evaluated so far, a single sealed
+report single-run, no-fallback results for the Schema method on the
+public set, produced by sealed agents whose transcripts are audited for
+information leakage and published — a contamination-control protocol not
+previously reported on this benchmark (concurrently, Tycho
+[arXiv:2607.28287] reports open-source public-set saturation with a
+different method; see §6). On the games evaluated so far, a single sealed
 run with a current frontier model matches or exceeds Schema's best-of-two
 figures at 2.5–3.5× less wall-clock. All code, event logs, and world
 models are released under MIT.
@@ -138,8 +141,25 @@ Observations from the completed runs:
 
 ## 6. Related work
 
-[TODO: Schema; Duck Harness (Tufa Labs); Prime Agent; Arcgentica;
-executable-world-model papers (arXiv 2605.05138, 2512.24156).]
+**Tycho** (arXiv:2607.28287, July 30 2026; open source) formalizes
+ARC-AGI-3 games as rendered deterministic Moore machines and reports —
+in one matched public-set run per orchestration policy — Opus 4.8 at
+88.49 mean RHAE, and GPT-5.6 Sol and Opus 5 at **100.00 RHAE across all
+183 levels**. Tycho therefore holds the first published open-source
+saturation of the public set, predating this work's sweep. Our
+contribution is orthogonal: Tycho is its own method; we reconstruct and
+validate *Schema's specific unreleased system* from its traces, and add
+the sealed/audited protocol that neither Schema nor Tycho report
+(Tycho's abstract makes no contamination-control claims). Our per-game
+numbers double as the first Schema-method single-run figures.
+
+[TODO also: Duck Harness (Tufa Labs, Milestone 1 winner, open source);
+Prime Agent (Prime Intellect, MIT — no published ARC-AGI-3 score;
+third-party claims of 95.5% appear unsourced); Arcgentica; Executable
+World Models for ARC-AGI-3 (arXiv:2605.05138); Graph-Based Exploration
+(arXiv:2512.24156). Schema's harness remains unreleased: an open request
+on their trace repository (HF discussion #1, ~3 weeks old) has no author
+response, and their site states no release plans.]
 
 ## 7. Reproducing
 
