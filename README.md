@@ -25,7 +25,8 @@ harness. This project:
 |---|---|---|---|---|---|
 | sb26 | 8/8 WIN | 128 (213) | **100.00%** | 0.23 h | clean |
 | ls20 | 7/7 WIN | 497 (776) | **100.00%** | 1.75 h | clean |
-| *remaining 23* | *in progress* | | | | |
+| ft09 | 6/6 WIN | 75 (208) | **100.00%** | 0.9 h | clean; 1 logged infra rerun |
+| *remaining 22* | *in progress* | | | | |
 
 Reference: Schema's best-of-two per-game results for these games were
 98.63% (sb26, 127 actions) and 100% (ls20, 533 actions, ~6.1 h).
