@@ -1,0 +1,2 @@
+2026-08-16T22:52:56Z interrupted: all 5 concurrent sessions aborted with 'Execution error' ~23min in (apparent account-level API throttling under 6-way concurrency); resuming same run, no actions lost
+2026-08-17T00:51:35Z resumed after throttling interruption
