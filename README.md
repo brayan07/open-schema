@@ -34,9 +34,10 @@ harness. This project:
 | r11l | 6/6 WIN | 79 (233) | **100.00%** | 1.44 h | clean; interrupted+resumed (logged) |
 | cd82 | 6/6 WIN | 217 (171) | **100.00%** | 2.42 h | 1 hit, reviewed benign (guard blocked; see audit-note) |
 | g50t | 7/7 WIN | 415 (879) | **94.45%** | 1.9 h | clean; interrupted+resumed (logged) |
-| *remaining 14* | *in progress* | | | | |
+| m0r0 | 6/6 WIN | 226 (1107) | **100.00%** | 1.2 h | clean |
+| *remaining 13* | *in progress* | | | | |
 
-**Running mean over 11 completed games: 88.94%** (eight 100s, 94.45, 83.89, 0).
+**Running mean over 12 completed games: 89.86%** (nine 100s, 94.45, 83.89, 0).
 
 Reference: Schema's best-of-two per-game results for these games:
 sb26 98.63%, ls20 100%, ft09 100%, ar25 100%, tr87 100%. The single-run
