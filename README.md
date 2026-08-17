@@ -1,6 +1,11 @@
 # open-schema — an open replication of the Schema ARC-AGI-3 harness
 
-**Status: sweep COMPLETE — all 25 public games evaluated.**
+> **⚠️ WORK IN PROGRESS.** The 25-game sweep is complete and all
+> results below are final as measured, but the accompanying paper is a
+> draft, analysis is ongoing, and sections may change. Shared early on
+> purpose — issues and corrections welcome.
+
+**Status: sweep complete — all 25 public games evaluated; write-up in progress.**
 
 ## Headline
 

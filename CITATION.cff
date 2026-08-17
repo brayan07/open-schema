@@ -7,7 +7,7 @@ authors:
     given-names: Brayan
 type: software
 year: 2026
-url: https://github.com/USERNAME/open-schema
+url: https://github.com/brayan07/open-schema
 abstract: >
   Reconstruction of the unreleased Schema harness for ARC-AGI-3 from its
   50 published gameplay trajectories, validated against those traces,

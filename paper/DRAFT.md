@@ -1,8 +1,10 @@
 # Reconstructing Schema: an open replication of the ARC-AGI-3
 # world-model harness, with single-run no-fallback results
 
-**DRAFT — work in progress.** Sections marked TODO await the full
-25-game sweep.
+**DRAFT — WORK IN PROGRESS.** The 25-game sweep is complete; prose
+sections marked TODO are unwritten, numbers may be re-checked, and the
+structure may change before submission. Cite the repository, not this
+draft, until a versioned preprint exists.
 
 ## Abstract (draft)
 
@@ -154,7 +156,12 @@ dc22 — mechanics fully modelled, win condition unfound); (c) premature
 resignation — stopping with budget and a live hypothesis in hand (cn04);
 (d) object identity lost by per-frame re-parsing (s5i5) — the one
 modelling-level failure, and precisely the problem the original's
-persistent-state models solved; (e) unrecovered terminal state (wa30).
+persistent-state models solved; (e) unrecovered terminal state (wa30) — whose deeper cause is (f)
+**adversarial non-determinism**: wa30's rival agents mutate the board
+between the agent's actions, breaking the premise that a model green on
+past transitions predicts future ones; the run died on a per-level action
+budget, three moves short, after a rival collision and a lost race cost
+~19 actions.
 Notably, Opus's world models stayed green almost everywhere: on hard
 games the binding constraint was goal discovery, not world modelling.
 
