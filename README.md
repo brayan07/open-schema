@@ -39,9 +39,10 @@ harness. This project:
 | cn04 | 4/6 STOPPED | 164 (789) | **47.62%** | 2.46 h | clean; premature stop with budget+hypothesis in hand |
 | vc33 | 7/7 WIN | 195 (447) | **100.00%** | 1.06 h | clean |
 | ka59 | 7/7 WIN | 340 (730) | **100.00%** | 1.8 h | clean |
-| *remaining 9* | *in progress* | | | | |
+| sk48 | 7/8 STOPPED | 589 (1070) | **77.78%** | 2.81 h | clean; 7 levels all above cap, stalled on finale |
+| *remaining 8* | *in progress* | | | | |
 
-**Running mean over 16 completed games: 85.27%** (eleven 100s, 94.45, 83.89, 47.62, 31.41, 0).
+**Running mean over 17 completed games: 84.83%** (eleven 100s, 94.45, 83.89, 77.78, 47.62, 31.41, 0).
 
 Reference: Schema's best-of-two per-game results for these games:
 sb26 98.63%, ls20 100%, ft09 100%, ar25 100%, tr87 100%. The single-run
