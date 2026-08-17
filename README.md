@@ -1,8 +1,16 @@
 # open-schema — an open replication of the Schema ARC-AGI-3 harness
 
-**Status: work in progress, shared openly.** Single-run results for the
-full 25-game public set are being collected now; this repo updates as
-they land.
+**Status: sweep COMPLETE — all 25 public games evaluated.**
+
+## Headline
+
+**Mean RHAE 74.05% over all 25 public games — single-run, no fallback,
+sealed agents, every transcript audited.** 16/25 wins, 148/183 levels.
+For calibration: Schema reports 98.98% under best-of-two selection;
+Tycho reports 100% single-run-per-policy (different method, no sealing);
+Rodionov's May 2026 single-run baseline was 32.58%. The distribution —
+thirteen 100s and a long honest tail — is what selection-free reporting
+on this benchmark actually looks like.
 
 [Schema](https://schema-harness.github.io/) reported 95.35% (GPT-5.6 Sol)
 and 98.98% (Claude Opus 4.8 + Fable 5) RHAE on the ARC-AGI-3 public set,
@@ -47,9 +55,10 @@ harness. This project:
 | s5i5 | 2/8 STOPPED | 106 (638) | **7.91%** | 2.5 h | clean |
 | lf52 | 3/10 STOPPED | 160 (1339) | **10.91%** | 1.67 h | clean |
 | wa30 | 4/9 GAME_OVER | 357 (1843) | **22.22%** | 1.10 h | clean; ended in death state |
-| *remaining 1 (bp35)* | *in progress* | | | | |
+| bp35 | 5/9 STOPPED | 187 (651) | **33.33%** | 2.18 h | clean |
 
-**Running mean over 24 completed games: 76.04%** (thirteen 100s, 94.45, 94.18, 83.89, 77.78, two 47.62, 31.41, 22.22, 10.91, 7.91, 0).
+**Final mean: 74.05%** — thirteen 100s; 94.45, 94.18, 83.89 (wins); 77.78,
+two 47.62, 33.33, 31.41, 22.22, 10.91, 7.91, 0 (incomplete runs).
 
 Reference: Schema's best-of-two per-game results for these games:
 sb26 98.63%, ls20 100%, ft09 100%, ar25 100%, tr87 100%. The single-run
