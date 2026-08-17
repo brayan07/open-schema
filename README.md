@@ -46,9 +46,10 @@ harness. This project:
 | dc22 | 4/6 STOPPED | 254 (1228) | **47.62%** | 1.64 h | clean; stalled entering L4 |
 | s5i5 | 2/8 STOPPED | 106 (638) | **7.91%** | 2.5 h | clean |
 | lf52 | 3/10 STOPPED | 160 (1339) | **10.91%** | 1.67 h | clean |
-| *remaining 2* | *in progress* | | | | |
+| wa30 | 4/9 GAME_OVER | 357 (1843) | **22.22%** | 1.10 h | clean; ended in death state |
+| *remaining 1 (bp35)* | *in progress* | | | | |
 
-**Running mean over 23 completed games: 78.38%** (thirteen 100s, 94.45, 94.18, 83.89, 77.78, two 47.62, 31.41, 10.91, 7.91, 0).
+**Running mean over 24 completed games: 76.04%** (thirteen 100s, 94.45, 94.18, 83.89, 77.78, two 47.62, 31.41, 22.22, 10.91, 7.91, 0).
 
 Reference: Schema's best-of-two per-game results for these games:
 sb26 98.63%, ls20 100%, ft09 100%, ar25 100%, tr87 100%. The single-run
