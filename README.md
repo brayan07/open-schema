@@ -3,7 +3,10 @@
 > **⚠️ WORK IN PROGRESS.** The 25-game sweep is complete and all
 > results below are final as measured, but the accompanying paper is a
 > draft, analysis is ongoing, and sections may change. Shared early on
-> purpose — issues and corrections welcome.
+> purpose — issues and corrections welcome. **Full human review of the
+> code, results, and prose is still pending**: this project was built
+> and evaluated with heavy AI assistance, and the maintainer has not
+> yet independently verified every artifact.
 
 **Status: sweep complete — all 25 public games evaluated; write-up in progress.**
 

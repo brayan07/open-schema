@@ -3,8 +3,11 @@
 
 **DRAFT — WORK IN PROGRESS.** The 25-game sweep is complete; prose
 sections marked TODO are unwritten, numbers may be re-checked, and the
-structure may change before submission. Cite the repository, not this
-draft, until a versioned preprint exists.
+structure may change before submission. **Full human review is still
+pending** — this draft and the underlying experiments were produced with
+heavy AI assistance and have not yet been independently verified by the
+author. Cite the repository, not this draft, until a versioned preprint
+exists.
 
 ## Abstract (draft)
 
