@@ -124,11 +124,39 @@ ARC-Prize-verified run.
 Sealed, single-run, Claude Opus, text-only observation (as in the
 original — no vision):
 
-| game | outcome | actions (human) | RHAE | wall-clock | Schema best-of-2 |
-|---|---|---|---|---|---|
-| sb26 | WIN 8/8 | 128 (213) | **100.00%** | 0.23 h | 98.63% / 127 act |
-| ls20 | WIN 7/7 | 497 (776) | **100.00%** | 1.75 h | 100% / 533 act |
-| ... | TODO: remaining 23 games | | | | |
+| game | outcome | RHAE |
+|---|---|---|
+| sb26, ls20, ft09, ar25, tu93, lp85, r11l, cd82, m0r0, vc33, ka59, re86, sc25 | WIN | 100.00% |
+| g50t | WIN 7/7 | 94.45% |
+| su15 | WIN 9/9 | 94.18% |
+| tr87 | WIN 6/6 | 83.89% |
+| sk48 | STOPPED 7/8 | 77.78% |
+| cn04 | STOPPED 4/6 | 47.62% |
+| dc22 | STOPPED 4/6 | 47.62% |
+| bp35 | STOPPED 5/9 | 33.33% |
+| sp80 | STOPPED 4/6 | 31.41% |
+| wa30 | GAME_OVER 4/9 | 22.22% |
+| lf52 | STOPPED 3/10 | 10.91% |
+| s5i5 | STOPPED 2/8 | 7.91% |
+| tn36 | STOPPED 1/7 | 0.00% |
+
+**Mean RHAE: 74.05%. 16/25 wins; 148/183 levels.** Protocol events over
+the sweep: one infra rerun (ft09, settings misconfiguration, 0 actions
+lost); one five-run throttling interruption (continued in place, gaps
+logged); one audit hit (cd82), reviewed benign — an exclusion-pattern
+false positive that the command guard had blocked anyway.
+
+Failure taxonomy from the nine incomplete runs (full write-ups in each
+run's notes.md): (a) zero-feedback puzzles starve the counterexample
+loop entirely (tn36 — no observable change means nothing to model);
+(b) a green world model does not yield the goal predicate (sp80, sk48,
+dc22 — mechanics fully modelled, win condition unfound); (c) premature
+resignation — stopping with budget and a live hypothesis in hand (cn04);
+(d) object identity lost by per-frame re-parsing (s5i5) — the one
+modelling-level failure, and precisely the problem the original's
+persistent-state models solved; (e) unrecovered terminal state (wa30).
+Notably, Opus's world models stayed green almost everywhere: on hard
+games the binding constraint was goal discovery, not world modelling.
 
 Observations from the completed runs:
 
