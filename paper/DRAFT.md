@@ -21,9 +21,10 @@ public set, produced by sealed agents whose transcripts are audited for
 information leakage and published — a contamination-control protocol not
 previously reported on this benchmark (concurrently, Tycho
 [arXiv:2607.28287] reports open-source public-set saturation with a
-different method; see §6). On the games evaluated so far, a single sealed
-run with a current frontier model matches or exceeds Schema's best-of-two
-figures at 2.5–3.5× less wall-clock. All code, event logs, and world
+different method; see §6). On the games evaluated so far, a single sealed run with a current
+frontier model is competitive with Schema's best-of-two per-game figures
+at 1.7× less aggregate wall-clock (per-game 1.1–3.4×, largest where the
+original's runs were slowest). All code, event logs, and world
 models are released under MIT.
 
 ## 1. Background and motivation
